@@ -139,7 +139,7 @@ class CountrySite(models.Model):
     # icon = models.ImageField(
     #     upload_to=getattr(settings, "SITE_ICON_PATH", "site_icons/"), 
     #     storage=getattr(settings, "SITE_ICON_STORAGE", STATIC_STORAGE), blank=True, null=True) 
-    
+
     objects = CountrySiteManager()
 
     class Meta:
@@ -157,6 +157,11 @@ class CountrySite(models.Model):
 
     def get_default_language_display(self):
         return dict(settings.LANGUAGES).get(self.default_language)
+
+    def get_icon(self):
+        if getattr(settings, "SITE_ICON_DIR", False):
+            return settings.SITE_ICON_DIR + self.country_code + ".png"
+        return ""
 
     # def natural_key(self):
     #     return (self.country_code,)
@@ -186,7 +191,7 @@ class InternationalModel(models.Model):
     country_sites = models.ManyToManyField("international.CountrySite", blank=True)
     object_language = models.CharField(
         'Language',
-        max_length=25, choices=settings.LANGUAGES, null=True, blank=True,
+        max_length=25, null=True, blank=True,
         help_text="The language used for this item")
 
     # Extend default object manager

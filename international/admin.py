@@ -38,7 +38,7 @@ class CountrySitedmin(admin.ModelAdmin):
         if not getattr(settings, "SITE_ICON_DIR", False):
             return obj.name
 
-        flag = "<img src='/{0}' style='max-width: 50px; max-height: 18px;' />".format(settings.SITE_ICON_DIR + obj.country_code + ".png")
+        flag = "<img src='/{0}' style='max-width: 50px; max-height: 18px;' />".format(obj.get_icon())
         return mark_safe("{0} &nbsp;&nbsp;&nbsp;{1}".format(flag, obj.name))
 
     name_with_icon.short_description = "name"
@@ -59,12 +59,15 @@ class InternationalModelAdminMixin:
         form = super(InternationalModelAdminMixin, self).get_form(request, obj, **kwargs)
 
         small_icon_style = "float: right; height: 24px;"
-        form.base_fields["country_sites"].label_from_instance = lambda obj: mark_safe(
-            "{0} {1}".format(
-                obj.name, 
-                self.img_icon.format(settings.STATIC_ROOT + obj.icon.url, obj.name),
+
+        if getattr(settings, "SITE_ICON_DIR", False):
+            form.base_fields["country_sites"].label_from_instance = lambda obj: mark_safe(
+                "{0} {1}".format(
+                    obj.name, 
+                    self.img_icon.format(obj.get_icon(), obj.name),
+                )
             )
-        )
+        form.base_fields["object_language"] = forms.ChoiceField(choices=settings.LANGUAGES)
 
         return form
 
