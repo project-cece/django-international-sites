@@ -12,11 +12,14 @@ A single application to server multiple domains and country sites.
 ## Settings
 
 ```python
-# Map domains uniquely to a single country code
+# Fallback country code
+DEFAULT_COUNTRY_CODE = "NL"
+
+# Map domains uniquely to a single country code (optional)
 UNIQUE_DOMAINS = {"projectcece.nl": "nl", "projectcece.co.uk": "uk"}
 
-# Fallback country code
-DEFAULT_COUNTRY_CODE = "int"
+# Directory for site icons to be displayed in admin (optional)
+SITE_ICON_DIR = "static/site_icons/"
 ```
 
 ## Request middleware
