@@ -17,21 +17,32 @@ from .models import CountrySite
 @admin.register(CountrySite)
 class CountrySitedmin(admin.ModelAdmin):
     list_display = (
-        "name", "country_code", "default_language", "domain", "show_icon",
+        "name_with_icon", "country_code", "default_language", "domain",
     )
 
-    def show_icon(self, obj):
+    def get_form(self, request, obj=None, **kwargs):
+        """Add to default forms"""
+
+        form = super(CountrySitedmin, self).get_form(request, obj, **kwargs)
+
+        small_icon_style = "float: right; height: 24px;"
+        form.base_fields["default_language"] = forms.ChoiceField(choices=settings.LANGUAGES)
+
+        return form
+
+    def name_with_icon(self, obj):
         """
-        Display icon as image
+        Display icon as image if iconpath given in settings
         """
 
-        if not obj.icon:
-            return ""
+        if not getattr(settings, "SITE_ICON_DIR", False):
+            return obj.name
 
-        flags = "<img src='/{0}' style='max-width: 50px; max-height: 18px;' />".format(settings.STATIC_ROOT + obj.icon.url)
-        return mark_safe(flags)
+        flag = "<img src='/{0}' style='max-width: 50px; max-height: 18px;' />".format(settings.SITE_ICON_DIR + obj.country_code + ".png")
+        return mark_safe("{0} &nbsp;&nbsp;&nbsp;{1}".format(flag, obj.name))
 
-    show_icon.short_description = "icon"
+    name_with_icon.short_description = "name"
+
 
 class InternationalModelAdminMixin:
 

@@ -133,12 +133,13 @@ class CountrySite(models.Model):
 
     # See: https://docs.djangoproject.com/en/3.2/topics/i18n/
     default_language = models.CharField(
-        max_length=25, choices=settings.LANGUAGES,
+        max_length=25, #choices=settings.LANGUAGES,
         help_text="Default language to be displayed on this country site")
 
-    icon = models.ImageField(
-        upload_to=getattr(settings, "SITE_ICON_PATH", "img/site_icons/"), 
-        storage=getattr(settings, "SITE_ICON_STORAGE", STATIC_STORAGE), blank=True, null=True) 
+    # icon = models.ImageField(
+    #     upload_to=getattr(settings, "SITE_ICON_PATH", "site_icons/"), 
+    #     storage=getattr(settings, "SITE_ICON_STORAGE", STATIC_STORAGE), blank=True, null=True) 
+    
     objects = CountrySiteManager()
 
     class Meta:
@@ -153,6 +154,9 @@ class CountrySite(models.Model):
 
     def __str__(self):
         return self.country_code
+
+    def get_default_language_display(self):
+        return dict(settings.LANGUAGES).get(self.default_language)
 
     # def natural_key(self):
     #     return (self.country_code,)
