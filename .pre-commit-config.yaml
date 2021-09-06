@@ -1,0 +1,29 @@
+exclude: 'docs|node_modules|migrations|fixtures|.git|.tox'
+default_stages: [commit]
+fail_fast: true
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+        exclude: '.svg|.css|.js.map'
+      - id: check-yaml
+
+  - repo: https://github.com/psf/black
+    rev: 21.5b0
+    hooks:
+      - id: black
+
+  - repo: https://github.com/timothycrosley/isort
+    rev: 5.8.0
+    hooks:
+      - id: isort
+
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.9.2
+    hooks:
+      - id: flake8
+        args: ['--config=setup.cfg']
+        additional_dependencies: [flake8-isort]
