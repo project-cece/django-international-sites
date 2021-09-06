@@ -56,6 +56,7 @@ All models in a project can be made international, i.e. associated to countries 
 
 ```python
 # models.py
+from international.models import InternationalModel
 
 class Product(InternationalModel):
     name = models.CharField(max_length=50)
