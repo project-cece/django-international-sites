@@ -128,7 +128,7 @@ class CountrySite(models.Model):
     country_code = models.SlugField(
         max_length=10, 
         help_text="Unique country code (e.g. NL, UK, DE)", 
-        unique=True, db_index=True
+        unique=True
     )
 
     # See: https://docs.djangoproject.com/en/3.2/topics/i18n/

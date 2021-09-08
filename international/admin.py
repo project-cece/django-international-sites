@@ -1,4 +1,6 @@
 
+import copy
+
 from django.conf import settings
 from django.contrib import admin
 from django.db import models
@@ -26,7 +28,7 @@ class CountrySitedmin(admin.ModelAdmin):
         form = super(CountrySitedmin, self).get_form(request, obj, **kwargs)
 
         small_icon_style = "float: right; height: 24px;"
-        form.base_fields["default_language"] = forms.ChoiceField(choices=settings.LANGUAGES)
+        form.base_fields["default_language"] = forms.ChoiceField(choices=[("", ""),] + list(settings.LANGUAGES))
 
         return form
 
@@ -50,31 +52,32 @@ class InternationalModelAdminMixin:
 
     list_filter = ("country_sites",) 
 
-    img_icon = "<img src='/{0}' data-toggle='tooltip' data-placement='left' \
-            data-html='true' alt='{1}' title='{1}' style='float: right; height: 24px;' />"
-
     def get_form(self, request, obj=None, **kwargs):
         """Add to default forms"""
 
         form = super(InternationalModelAdminMixin, self).get_form(request, obj, **kwargs)
 
         small_icon_style = "float: right; height: 24px;"
+        country_img_icon = "<img src='/{0}' data-toggle='tooltip' data-placement='left' \
+            data-html='true' alt='{1}' title='{1}' style='float: right; height: 24px;' />"
 
-        if getattr(settings, "SITE_ICON_DIR", False):
-            form.base_fields["country_sites"].label_from_instance = lambda obj: mark_safe(
-                "{0} {1}".format(
-                    obj.name, 
-                    self.img_icon.format(obj.get_icon(), obj.name),
-                )
+        form.base_fields["country_sites"].label_from_instance = lambda obj: mark_safe(
+            "{0} {1}".format(
+                obj.name, 
+                country_img_icon.format(obj.get_icon(), obj.name),
             )
-        form.base_fields["object_language"] = forms.ChoiceField(choices=settings.LANGUAGES)
+        )
+        form.base_fields["object_language"] = forms.ChoiceField(choices=[("", ""),] + list(settings.LANGUAGES))
+        form.base_fields["object_language"].required = False
 
         return form
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = super(InternationalModelAdminMixin, self).get_fieldsets(request, obj)
-        fieldsets[0][1]['fields'].remove('country_sites') 
-        fieldsets[0][1]['fields'].remove('object_language')
+
+        while 'country_sites' in fieldsets[0][1]['fields']: fieldsets[0][1]['fields'].remove('country_sites') 
+        while 'object_language' in fieldsets[0][1]['fields']: fieldsets[0][1]['fields'].remove('object_language')
+
         fieldsets += [("International", {"fields": (('country_sites', 'object_language'),)})] 
         return fieldsets
 
@@ -97,7 +100,7 @@ class TranslatedFieldsModelAdminMixin:
         fields = super(TranslatedFieldsModelAdminMixin, self).get_fields(request, obj)
         print("fields")
         for field in self.translation_fields:
-            if field in fields:
+            while field in fields:
                 fields.remove(field)
         print(fields)
         # fields.extend(self.add_translations_for_fields)
@@ -117,28 +120,34 @@ class TranslatedFieldsModelAdminMixin:
 
         form = super(TranslatedFieldsModelAdminMixin, self).get_form(request, obj, change, **kwargs)
 
+        self.translation_fields = []
+
         for field in self.translated_fields:
             form.base_fields[field].label = mark_safe(form.base_fields[field].label +": <br><i style='font-size: smaller; font-variant: petite-caps; font-weight: normal;'>translated field</i>")
 
             if obj:
-                for lang, name in settings.LANGUAGES:
+                for (lang, name) in settings.LANGUAGES:
                     if lang != settings.LANGUAGE_CODE:
                         new_field = field + "_" + lang
                         if new_field not in form.base_fields.keys():
-                            form.base_fields[new_field] = fields[field] 
+                            form.base_fields[new_field] = copy.deepcopy(fields[field]) 
                             form.base_fields[new_field].label = new_field
                             form.base_fields[new_field].disabled = True
                             form.base_fields[new_field].required = False
 
-                            with translation.override(lang):
-                                form.base_fields[new_field].initial = _(getattr(obj, field))
+                            if getattr(obj, field, None) != None:
+                                with translation.override(lang):
+                                    form.base_fields[new_field].initial = _(getattr(obj, field))
+
                             self.translation_fields.append(new_field)
+
 
         return form
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = super(TranslatedFieldsModelAdminMixin, self).get_fieldsets(request, obj)
-        fieldsets += [("International Translated Fields", {"fields": set(self.translation_fields), "description": self.INTRO})] 
+        print(self.translation_fields)
+        fieldsets += [("International Translated Fields", {"fields": self.translation_fields, "description": self.INTRO})] 
         return fieldsets
 
 
