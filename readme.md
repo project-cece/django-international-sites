@@ -43,11 +43,11 @@ MIDDLEWARE = [
 ]
 ```
 
-This makes the `country_site` available through the request object. E.g., in views:
+This makes the current `CountrySite` object available through the request object. E.g., in views:
 
 ```python
 def index(request):
-    country_code = request.country_code
+    country_site = request.country_site
 ```
 
 ## Models
