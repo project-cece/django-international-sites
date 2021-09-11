@@ -1,4 +1,5 @@
 import os
+import shutil
 import requests
 
 from django.core.management.base import BaseCommand
@@ -31,10 +32,13 @@ class Command(BaseCommand):
         latest_file_dig = int(latest_file.split(".tar.gz")[0].split("_")[-1])
         
         print(check.headers)
+        if not os.path.exists(settings.GEOIP_PATH):
+            os.makedirs(settings.GEOIP_PATH)
 
         # Check if file in geolite directory
         dbs = 0
         download = True
+        extract = False
         for fname in os.listdir(settings.GEOIP_PATH):
             if fname.endswith(".mmdb"):
                 dbs += 1
@@ -42,14 +46,6 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS('Current GeoIP2 database tar is the latest version available ({0})'.format(fname)))
                 download = False
                 break
-
-            # elif fname.endswith(".tar.gz"):
-            #     fdate = fname.split("_")[-1].split(".tar.gz")[0]
-            #     if fdate.isdigit():
-            #         if fdate <= latest_file_dig:
-            #             download = False
-            #             self.stdout.write(self.style.SUCCESS('Current GeoIP2 database tar is the latest version available ({0})'.format(fname)))
-            #             break
                     
         if dbs == 0:
             download = True
@@ -67,8 +63,31 @@ class Command(BaseCommand):
 
 
             tar = tarfile.open(fpath)
-            tar.extractall(settings.GEOIP_PATH ) # specify which folder to extract to
+            tar.extractall(settings.GEOIP_PATH) # specify which folder to extract to
             tar.close()
+
+            extract = True
+
+
+        if extract :
+            # Move extracted db to geoip directory
+            dirname = latest_file.split(".tar")[0]
+            dirpath = "{0}/{1}".format(settings.GEOIP_PATH, dirname)
+            f = "{0}/{1}/GeoLite2-Country.mmdb".format(settings.GEOIP_PATH, dirname)
+            os.replace(f, "{0}/GeoLite2-Country.mmdb".format(settings.GEOIP_PATH))
+
+            # Clear up old extraction folder
+            if os.path.exists(dirpath):
+                for fname in os.listdir(dirpath):
+                    os.remove(os.path.join(dirpath,fname))
+                os.rmdir(dirpath)
+                print("...removed temp tar directory: {0}".format(dirpath))
+
+            # Clear up old tar files and subdirectories
+            for fname in os.listdir(settings.GEOIP_PATH):
+                if fname.endswith(".tar.gz") and not fname.startswith(latest_file):
+                    print("...removing old tar file: {0}".format(fname))
+                    os.remove(os.path.join(settings.GEOIP_PATH, fname))
 
         
 
