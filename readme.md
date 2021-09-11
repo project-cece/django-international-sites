@@ -15,6 +15,12 @@ A single application to server multiple domains and country sites.
 # Fallback country code
 DEFAULT_COUNTRY_CODE = "NL"
 
+# When using international.middleware.InternationalSiteMiddleware obtain
+# geoip license key (for free) at xx and set path were geoip2 country library is
+# to be installed here
+GEOIP_PATH = os.path.join("geoip")
+GEOIP_LICENSE = "asecretkeybymaxmind"
+
 # Map domains uniquely to a single country code (optional)
 UNIQUE_DOMAINS = {"projectcece.nl": "nl", "projectcece.co.uk": "uk"}
 
