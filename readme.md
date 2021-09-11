@@ -22,7 +22,7 @@ GEOIP_PATH = os.path.join("geoip")
 GEOIP_LICENSE = "asecretkeybymaxmind"
 
 # Map domains uniquely to a single country code (optional)
-UNIQUE_DOMAINS = {"projectcece.nl": "nl", "projectcece.co.uk": "uk"}
+UNIQUE_DOMAINS = {"example.nl": "nl", "example.co.uk": "uk"}
 
 # Directory for site icons to be displayed in admin (optional)
 SITE_ICON_DIR = "static/site_icons/"
