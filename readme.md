@@ -93,6 +93,17 @@ If you want to force using the `CountrySite.default_language` language for a giv
 FORCE_COUNTRY_LANGUAGE = True
 ```
 
+## Country detection endpoint
+
+The `international.views.get_country_from_request` is included that will return a JSON response with the detected visitor location based on their IP address when the MaxMind GeoIP2 library is installed. To use it, include `international.urls` in your project `urls.py`. This will include the `localize/` endpoint that only allows GET requests, with example response:
+
+```
+{
+    "country": "NL",    # country code or null
+    "detected": true    # false when the country could not be detected from the visitor IP
+}
+```
+
 ## Admin Mixins
 
 ### InternationalModelAdminMixin
