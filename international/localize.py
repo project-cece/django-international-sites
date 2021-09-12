@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.contrib.gis.geoip2 import GeoIP2
+from django.conf import settings 
 
 def visitor_ip_address(request):
 
@@ -13,6 +14,9 @@ def visitor_ip_address(request):
 
 
 def get_country_from_ip(request):
+
+	if not getattr(settings, GEOIP_PATH, False):
+		return None
 
 	IP = visitor_ip_address(request)
 
