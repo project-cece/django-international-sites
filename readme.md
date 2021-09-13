@@ -15,6 +15,8 @@ A single application to server multiple domains and country sites.
 # Fallback country code
 DEFAULT_COUNTRY_CODE = "NL"
 
+# Optional: Set the below if you want the middleware to set the current site based
+# on the location/country deduced from the visitor IP
 # When using international.middleware.InternationalSiteMiddleware obtain
 # geoip license key (for free) at xx and set path were geoip2 country library is
 # to be installed here
@@ -32,7 +34,7 @@ SITE_ICON_DIR = "static/site_icons/"
 
 How is the country code detected from the request?
 
-1. If unique domain name (e.g. projectcece.nl), use country data of related country code
+1. If a unique domain name set in `settings.UNIQUE_DOMAINS` (e.g. example.nl), use country data of related country code
 2. If country code is forced as url parameter (i.e. projectcece.com/c=fr), use that country code
 3. If a cookie with location preference is used, use that country code
 4. Check location based on visitor IP address, use that country code
