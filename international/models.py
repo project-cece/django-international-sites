@@ -173,12 +173,19 @@ class InternationalModelManager(models.Manager):
         """
         Return only objects that are linked to this country code
         """
+        if not getattr(settings, "INTERNATIONAL_APP", True):
+            return self.get_queryset()
+
         return self.get_queryset().filter(country_sites__country_code=country_code)
+        
 
     def by_language(self, language_code):
         """
         Return only objects that are tagged with this language code
         """
+        if not getattr(settings, "INTERNATIONAL_APP", True):
+            return self.get_queryset()
+        
         return self.get_queryset().filter(object_language=language_code)
 
 

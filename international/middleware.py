@@ -1,4 +1,5 @@
 from django.utils.deprecation import MiddlewareMixin
+from django.utils import translation
 from django.conf import settings
 
 from .models import CountrySite
@@ -12,9 +13,14 @@ class InternationalSiteMiddleware(MiddlewareMixin):
     def process_request(self, request):
         request.country_site = CountrySite.objects.get_current(request)
 
-        # Set language based on country site (in future, allow for different settings)
-        if (getattr(settings, "FORCE_COUNTRY_LANGUAGE", False)) & (request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME) != request.country_site.default_language):
-            request.COOKIES[settings.LANGUAGE_COOKIE_NAME] = request.country_site.default_language
+        # Set language based on country site if wanted
+        if (getattr(settings, "FORCE_COUNTRY_LANGUAGE", False)):
+            default_language = request.country_site.default_language
+            print("default lang: {0}".format(default_language))
+            if request.LANGUAGE_CODE != default_language:
+                translation.activate(default_language)
+                request.LANGUAGE_CODE = translation.get_language()
+
 
     def process_response(self, request, response):
         local = request.COOKIES.get("local", "")
