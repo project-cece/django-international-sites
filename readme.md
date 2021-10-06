@@ -4,7 +4,7 @@ A single application to server multiple domains and country sites.
 
 ## Install
 
-- `pip install django-international-sites-0.1.0.tar.gz`
+- `pip install django-international-sites`
 - Add "international" to `INSTALLED_APPS` in `settings.py`
 - Run `python manage.py migrate international`
 - Add `CountrySite` objects in admin `/admin/international/countrysite/`
