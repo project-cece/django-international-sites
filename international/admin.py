@@ -40,7 +40,7 @@ class CountrySitedmin(admin.ModelAdmin):
         if not getattr(settings, "SITE_ICON_DIR", False):
             return obj.name
 
-        flag = "<img src='/{0}' style='max-width: 50px; max-height: 18px;' />".format(obj.get_icon())
+        flag = "<img src='{0}' style='max-width: 50px; max-height: 18px;' />".format(obj.get_icon())
         return mark_safe("{0} &nbsp;&nbsp;&nbsp;{1}".format(flag, obj.name))
 
     name_with_icon.short_description = "name"
@@ -58,7 +58,7 @@ class InternationalModelAdminMixin:
         form = super(InternationalModelAdminMixin, self).get_form(request, obj, **kwargs)
 
         small_icon_style = "float: right; height: 24px;"
-        country_img_icon = "<img src='/{0}' data-toggle='tooltip' data-placement='left' \
+        country_img_icon = "<img src='{0}' data-toggle='tooltip' data-placement='left' \
             data-html='true' alt='{1}' title='{1}' style='float: right; height: 24px;' />"
 
         form.base_fields["country_sites"].label_from_instance = lambda obj: mark_safe(
@@ -78,8 +78,20 @@ class InternationalModelAdminMixin:
         while 'country_sites' in fieldsets[0][1]['fields']: fieldsets[0][1]['fields'].remove('country_sites') 
         while 'object_language' in fieldsets[0][1]['fields']: fieldsets[0][1]['fields'].remove('object_language')
 
-        fieldsets += [("International", {"fields": (('country_sites', 'object_language'),)})] 
+        added = False
+        for fields in fieldsets:
+            if "International" in fields[0]:
+                added = True
+                break
+
+        if not added:
+            fieldsets += [("International", {"fields": (('country_sites', 'object_language'),)})] 
+
         return fieldsets
+
+    def country_sites(self, obj):
+
+        return 
 
 
 class TranslatedFieldsModelAdminMixin:

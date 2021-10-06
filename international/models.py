@@ -160,7 +160,7 @@ class CountrySite(models.Model):
 
     def get_icon(self):
         if getattr(settings, "SITE_ICON_DIR", False):
-            return settings.SITE_ICON_DIR + self.country_code + ".png"
+            return settings.SITE_ICON_DIR + self.country_code + getattr(settings, "SITE_ICON_EXT", ".png")
         return ""
 
     # def natural_key(self):
