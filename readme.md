@@ -35,12 +35,12 @@ SITE_ICON_DIR = "static/site_icons/"
 How is the country code detected from the request?
 
 1. If a unique domain name set in `settings.UNIQUE_DOMAINS` (e.g. example.nl), use country data of related country code
-2. If country code is forced as url parameter (i.e. projectcece.com/c=fr), use that country code
+2. If country code is forced as url parameter (i.e. example.com/c=fr), use that country code
 3. If a cookie with location preference is used, use that country code
 4. Check location based on visitor IP address, use that country code
 5. If nothing could be detected, use default country code
 
-Add the middleware to settings:
+Add the middleware to settings _before_ the Django `LocaleMiddleware`:
 
 ```python
 MIDDLEWARE = [
@@ -104,6 +104,44 @@ The `international.views.get_country_from_request` is included that will return 
     "country": "NL",    # country code or null
     "detected": true    # false when the country could not be detected from the visitor IP
 }
+```
+
+## International Sitemap
+
+Use the International extension to the Django Sites Sitemap to create dynamic sitemaps based on the current request domain rather than a single fixed site domain. First, use [the Django Sitemaps like usual](https://docs.djangoproject.com/en/3.2/ref/contrib/sitemaps/) but instead of using the out-of-the-box `django.contrib.sites.sitemaps.views` import the same views from `international.sitemaps.views`, this will change the domain of the urls shown in the sitemap to that of the current request CountrySite instead of the hardcoded Site domain (which can only be one per application).
+
+```python
+from international.sitemaps import views as international_sitemap_views
+
+# Register sitemap views
+
+urlpatterns += (
+    path(
+        r"sitemap.xml", international_sitemap_views.index, {"sitemaps": sitemap_sections}
+    ),
+    path(
+        "sitemap-<section>.xml",
+        international_sitemap_views.sitemap,
+        {"sitemaps": sitemap_sections},
+        name="international.sitemaps.views.sitemap",
+    ),
+)
+```
+
+In order to limit/adjust the items shown in a sitemap based on the current request domain/current CountrySite. Inherit the `InternationalSitemap` extension in your Sitemap class (this is available for models that use `InternationalModel`), this wel make the country_code of the current request available inside the class methods. For example, here the blog post items shown in the sitemap are filtered by country code:
+
+```python
+from international.sitemaps import InternationalSitemap
+
+class BlogSitemap(InternationalSitemap):
+    changefreq = "weekly"
+    priority = 0.5
+
+    def items(self):
+        return Post.objects.by_country(self.country_code)
+
+    def lastmod(self, obj):
+        return obj.published_date
 ```
 
 ## Admin Mixins
