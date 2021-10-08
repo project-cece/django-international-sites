@@ -1,6 +1,6 @@
 # Django International 
 
-A single application to server multiple domains and country sites. 
+An app to allow a single Django application to serve multiple domains and country sites and adjust the content based on that. Similar to the Django Sites Framework, but without the `Site` hardcoded in the settings of the app. Instead it uses a `CountrySite` object (similar to `Site`) which can be set dynamically in the middleware based on the request domain, session, url parameter or visitor location. 
 
 ## Install
 
