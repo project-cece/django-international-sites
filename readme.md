@@ -40,13 +40,13 @@ How is the country code detected from the request?
 4. Check location based on visitor IP address, use that country code
 5. If nothing could be detected, use default country code
 
-Add the middleware to settings _before_ the Django `LocaleMiddleware`:
+Add the middleware to settings _after_ the Django `LocaleMiddleware`:
 
 ```python
 MIDDLEWARE = [
 	...
-    'international.middleware.InternationalSiteMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    'international.middleware.InternationalSiteMiddleware',
     'vinaigrette.middleware.VinaigretteAdminLanguageMiddleware'
 ]
 ```
