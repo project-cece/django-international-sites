@@ -16,7 +16,6 @@ class InternationalSiteMiddleware(MiddlewareMixin):
         # Set language based on country site if wanted
         if (getattr(settings, "FORCE_COUNTRY_LANGUAGE", False)):
             default_language = request.country_site.default_language
-            print("default lang: {0}".format(default_language))
             if request.LANGUAGE_CODE != default_language:
                 translation.activate(default_language)
                 request.LANGUAGE_CODE = translation.get_language()
