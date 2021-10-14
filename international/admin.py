@@ -16,6 +16,10 @@ from django.utils.translation import gettext_lazy as _
 
 from .models import CountrySite
 
+SMALL_ICON_STYLE = "float: right; height: 18px;"
+COUNTRY_IMG_ICON = "<img src='{0}' data-toggle='tooltip' data-placement='left' \
+            data-html='true' alt='{1}' title='{1}' style='{2}' />"
+
 @admin.register(CountrySite)
 class CountrySitedmin(admin.ModelAdmin):
     list_display = (
@@ -26,8 +30,6 @@ class CountrySitedmin(admin.ModelAdmin):
         """Add to default forms"""
 
         form = super(CountrySitedmin, self).get_form(request, obj, **kwargs)
-
-        small_icon_style = "float: right; height: 24px;"
         form.base_fields["default_language"] = forms.ChoiceField(choices=[("", ""),] + list(settings.LANGUAGES))
 
         return form
@@ -57,14 +59,10 @@ class InternationalModelAdminMixin:
 
         form = super(InternationalModelAdminMixin, self).get_form(request, obj, **kwargs)
 
-        small_icon_style = "float: right; height: 24px;"
-        country_img_icon = "<img src='{0}' data-toggle='tooltip' data-placement='left' \
-            data-html='true' alt='{1}' title='{1}' style='float: right; height: 24px;' />"
-
         form.base_fields["country_sites"].label_from_instance = lambda obj: mark_safe(
             "{0} {1}".format(
                 obj.name, 
-                country_img_icon.format(obj.get_icon(), obj.name),
+                COUNTRY_IMG_ICON.format(obj.get_icon(), obj.name, SMALL_ICON_STYLE),
             )
         )
         form.base_fields["object_language"] = forms.ChoiceField(choices=[("", ""),] + list(settings.LANGUAGES))
@@ -80,19 +78,33 @@ class InternationalModelAdminMixin:
 
         added = False
         for fields in fieldsets:
-            if "International" in fields[0]:
-                added = True
-                break
+
+            if fields[0]:
+                if "International" in fields[0]:
+                    added = True
+                    break
 
         if not added:
             fieldsets += [("International", {"fields": (('country_sites', 'object_language'),)})] 
 
         return fieldsets
 
-    def country_sites(self, obj):
+    def display_country_sites(self, obj):
+        show = ""
+        for tmp in obj.country_sites.all():
+            # If no images set, use country code
+            if not getattr(settings, "SITE_ICON_DIR", False):
+                icon = obj.country_code + ","
+            else:
+                icon = COUNTRY_IMG_ICON.format(tmp.get_icon(), tmp.name, SMALL_ICON_STYLE + "padding:1px;") 
+            show += icon
+            show += "<style>.column-display_country_sites{max-width: 85px;}</style>"
+        return mark_safe(show)
+    display_country_sites.short_description = "Country Sites"
+
+    def display_language(self, obj):
 
         return 
-
 
 class TranslatedFieldsModelAdminMixin:
     """
@@ -110,13 +122,10 @@ class TranslatedFieldsModelAdminMixin:
 
     def get_fields(self, request, obj=None):
         fields = super(TranslatedFieldsModelAdminMixin, self).get_fields(request, obj)
-        print("fields")
         for field in self.translation_fields:
             while field in fields:
                 fields.remove(field)
-        print(fields)
-        # fields.extend(self.add_translations_for_fields)
-        # print(fields)
+
         return fields
 
     def __init__(self, *args, **kwargs):
@@ -158,7 +167,6 @@ class TranslatedFieldsModelAdminMixin:
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = super(TranslatedFieldsModelAdminMixin, self).get_fieldsets(request, obj)
-        print(self.translation_fields)
         fieldsets += [("International Translated Fields", {"fields": self.translation_fields, "description": self.INTRO})] 
         return fieldsets
 
