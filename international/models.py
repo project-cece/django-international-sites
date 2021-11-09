@@ -31,7 +31,7 @@ class CountrySiteManager(models.Manager):
 
         try:
             # For unique domain names, map to countrycode without db
-            uniques = getattr(settings, 'UNIQUE_DOMAINS', {})
+            uniques = getattr(settings, "UNIQUE_DOMAINS", {})
             if host in uniques:
                 country_code = uniques[host]
 
@@ -40,18 +40,19 @@ class CountrySiteManager(models.Manager):
                 country_code = request.GET["c"].upper()
 
             # Check if user already has location saved in cookie
-            # elif request.session.get("local", False):
-            #     country_code = request.session.get("local")
             elif request.COOKIES.get("local", False):
+                # country_code = request.session.get("local")
                 country_code = request.COOKIES.get("local")
 
             # TODO: If none of the above: Detect location based on IP
-            else:
+            elif getattr(settings, "GEOIP_REDIRECT", False):
                 country_code = get_country_from_ip(request)
-                print("Detected country code from IP: {0}".format(country_code))
+
+                if settings.DEBUG:
+                    print("Detected country code from IP: {0}".format(country_code))
 
             if not country_code:
-                country_code = getattr(settings, 'DEFAULT_COUNTRY_CODE', '')
+                country_code = getattr(settings, "DEFAULT_COUNTRY_CODE", '')
 
             # First attempt to look up the site by host with or without port.
             if country_code not in COUNTRY_SITE_CACHE:
@@ -67,14 +68,14 @@ class CountrySiteManager(models.Manager):
                 domain, port = split_domain_port(host)
                 print(domain)
                 print(port)
-                if port in getattr(settings, 'DEBUG_UNIQUE_DOMAINS', {}):
+                if port in getattr(settings, "DEBUG_UNIQUE_DOMAINS", {}):
                     country_code = settings.DEBUG_UNIQUE_DOMAINS[port]
                     print(country_code)
                     COUNTRY_SITE_CACHE[country_code] = self.get(country_code=country_code)
 
                     return COUNTRY_SITE_CACHE[country_code]
 
-            country_code = getattr(settings, 'DEFAULT_COUNTRY_CODE', '')
+            country_code = getattr(settings, "DEFAULT_COUNTRY_CODE", "")
             if country_code:
                 COUNTRY_SITE_CACHE[country_code] = self.get(country_code=country_code)
                 return COUNTRY_SITE_CACHE[country_code]
@@ -162,6 +163,15 @@ class CountrySite(models.Model):
         if getattr(settings, "SITE_ICON_DIR", False):
             return settings.SITE_ICON_DIR + self.country_code + getattr(settings, "SITE_ICON_EXT", ".png")
         return ""
+
+    def get_country_site_switch_url(self):
+
+        unique = getattr(settings, "UNIQUE_DOMAINS", {})
+        if getattr(unique, self.domain, False):
+            return self.domain 
+
+        return "//" + self.domain + "?c={0}".format(self.country_code)
+
 
     # def natural_key(self):
     #     return (self.country_code,)

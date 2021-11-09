@@ -4,9 +4,7 @@ from django.views.decorators.http import require_http_methods
 
 from international import localize
 
-@require_http_methods(["GET"])
-def get_country_from_request(request):
-
+def get_country_data_from_request(request):
 	country = localize.get_country_from_ip(request)
 
 	data = {
@@ -14,4 +12,8 @@ def get_country_from_request(request):
 		"detected": True if country else False,
 	}
 
-	return JsonResponse(data)
+	return data	
+
+@require_http_methods(["GET"])
+def get_country_from_request(request):
+	return JsonResponse(get_country_data_from_request(request))
