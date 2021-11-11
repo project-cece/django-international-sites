@@ -18,6 +18,9 @@ STATIC_STORAGE = FileSystemStorage(location=settings.STATIC_ROOT)
 class CountrySiteManager(models.Manager):
     use_in_migrations = True
 
+    def active_sites(self):
+        return self.get_queryset().filter(active=True)
+
     def _get_site_by_country_code(self, country_code):
         if country_code not in COUNTRY_SITE_CACHE:
             site = self.get(country_code=country_code)
@@ -131,6 +134,7 @@ class CountrySite(models.Model):
         help_text="Unique country code (e.g. NL, UK, DE)", 
         unique=True
     )
+    active = models.BooleanField(default=True)
 
     # See: https://docs.djangoproject.com/en/3.2/topics/i18n/
     default_language = models.CharField(

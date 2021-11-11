@@ -23,7 +23,7 @@ COUNTRY_IMG_ICON = "<img src='{0}' data-toggle='tooltip' data-placement='left' \
 @admin.register(CountrySite)
 class CountrySitedmin(admin.ModelAdmin):
     list_display = (
-        "name_with_icon", "country_code", "default_language", "domain",
+        "name_with_icon", "active", "country_code", "default_language", "domain",
     )
 
     def get_form(self, request, obj=None, **kwargs):
