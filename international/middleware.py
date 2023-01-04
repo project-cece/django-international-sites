@@ -44,7 +44,6 @@ class InternationalSiteMiddleware(MiddlewareMixin):
         # For use by js frontend
         if local != country_code:
             response.set_cookie("local", country_code)
-            request.session["local"] = country_code
 
         # Detect location if not know already
         if not getattr(settings, "GEOIP_REDIRECT", False):
