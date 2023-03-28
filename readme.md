@@ -78,9 +78,14 @@ This will add the `country_sites` and `object_language` field and extend the mod
 To filter all models associated with CountrySite `nl` or with language "en":
 
 ```python
+# Get all items associated to a country code
 products = Product.objects.by_country("nl")
 
+# Get all items associated to a language code
 products = Product.objects.by_language("en")
+
+# Get all items associated to either a country code or language code
+products = Product.by_country_or_language(country_code="nl", language_code="en")
 ```
 
 ## Language

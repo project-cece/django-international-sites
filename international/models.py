@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.conf import settings
 from django.http.request import split_domain_port
 from django.core.exceptions import ImproperlyConfigured
@@ -201,6 +202,18 @@ class InternationalModelManager(models.Manager):
             return self.get_queryset()
         
         return self.get_queryset().filter(object_language=language_code)
+
+    def by_country_or_language(self, country_code, language_code):
+        """
+        Return only objects that are tagged with this country code 
+        or language code
+        """
+        if not getattr(settings, "INTERNATIONAL_APP", True):
+            return self.get_queryset()
+        
+        return self.get_queryset().filter(
+            Q(country_sites__country_code=country_code) | Q(object_language=language_code)
+        )
 
 
 class InternationalModel(models.Model):
