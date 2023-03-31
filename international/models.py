@@ -213,7 +213,7 @@ class InternationalModelManager(models.Manager):
         
         return self.get_queryset().filter(
             Q(country_sites__country_code=country_code) | Q(object_language=language_code)
-        )
+        ).distinct()
 
 
 class InternationalModel(models.Model):
